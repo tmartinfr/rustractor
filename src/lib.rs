@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use uuid::Uuid;
 
 // trait Reader {
@@ -24,7 +24,7 @@ impl<'a> Message<'a> {
 }
 
 pub struct MemoryThreadStore<'a> {
-    store: Box<HashMap<Uuid, Message<'a>>>,
+    store: Box<BTreeMap<Uuid, Message<'a>>>,
 }
 
 // impl Thread for MemoryThreadStore {
@@ -39,7 +39,7 @@ pub struct MemoryThreadStore<'a> {
 
 impl MemoryThreadStore<'_> {
     pub fn new() -> Self {
-        let store =  Box::new(HashMap::new());
+        let store =  Box::new(BTreeMap::new());
         Self { store }
     }
 }
