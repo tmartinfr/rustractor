@@ -1,45 +1,31 @@
-use std::collections::BTreeMap;
-use uuid::Uuid;
-
-// trait Reader {
-
-// }
-
-trait Thread {
-    //fn insert(msg: Message, parent: Option<u32>);
-    // fn search(id: u32);
-    // fn read();
-}
-
-struct Message<'a> {
+pub struct Message {
     content: String,
     author: String,
-    thread: Option<&'a (dyn Thread + 'a)>,
 }
 
-impl<'a> Message<'a> {
-    pub fn new(content: String, author: String, thread: Option<&'a (dyn Thread + 'a)>) -> Self {
-        Self { content, author, thread }
+impl Message {
+    pub fn new(content: String, author: String) -> Self {
+        Self { content, author }
     }
 }
 
-pub struct MemoryThreadStore<'a> {
-    store: Box<BTreeMap<Uuid, Message<'a>>>,
+pub trait Thread {
+    fn add(self, message: Message);
 }
 
-// impl Thread for MemoryThreadStore {
+pub struct MemoryThreadStore {
+    messages: Box<Vec<Message>>,
+}
 
-//     fn insert(msg: Message, parent_id: Option<u32>) {
-//     //     if let Some(id) = parent_id {
-//     //         parent_id = id;
-//     //         store = self
-//     //     }
-//     }
-// }
+impl Thread for MemoryThreadStore {
+    fn add(mut self, message: Message) {
+        self.messages.push(message);
+    }
+}
 
-impl MemoryThreadStore<'_> {
-    pub fn new() -> Self {
-        let store =  Box::new(BTreeMap::new());
-        Self { store }
+impl MemoryThreadStore {
+    pub fn new() -> MemoryThreadStore {
+        let messages = Box::new(Vec::new());
+        MemoryThreadStore { messages }
     }
 }
