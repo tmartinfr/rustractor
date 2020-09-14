@@ -10,7 +10,7 @@ impl Message {
 }
 
 pub trait Thread {
-    fn add(self, message: Message);
+    fn add(&mut self, message: Message);
 }
 
 pub struct MemoryThreadStore {
@@ -18,7 +18,7 @@ pub struct MemoryThreadStore {
 }
 
 impl Thread for MemoryThreadStore {
-    fn add(mut self, message: Message) {
+    fn add(&mut self, message: Message) {
         self.messages.push(message);
     }
 }

@@ -3,7 +3,14 @@ use rustractor::Thread;
 use rustractor::Message;
 
 fn main() {
-    let thread = MemoryThreadStore::new();
+    let mut thread = MemoryThreadStore::new();
+
     let message = Message::new(String::from("hey ma gueule ?"), String::from("Bernard"));
     thread.add(message);
+
+    let message = Message::new(String::from("sa va ?"), String::from("Bernard"));
+    thread.add(message);
+
+    let mut thread2 = MemoryThreadStore::new();
+    let message2 = Message::new(String::from("ou bien ?"), String::from("Bernard"));
 }
