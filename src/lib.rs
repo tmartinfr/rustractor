@@ -8,6 +8,10 @@ impl<'a> Message<'a> {
     pub fn new(content: String, author: String) -> Self {
         Self { content, author, thread: None }
     }
+
+    pub fn add_thread(&mut self, thread: &'a dyn Thread<'a>) {
+        self.thread = Some(thread);
+    }
 }
 
 pub struct MemoryThreadStore<'a> {
@@ -15,7 +19,7 @@ pub struct MemoryThreadStore<'a> {
 }
 
 pub trait Thread<'a> {
-    fn add(&mut self, message: &'a Message<'a>); // , thread: Option<&'a (dyn Thread + 'a)>);
+    fn add(&mut self, message: &'a Message<'a>);
 }
 
 impl<'a> Thread<'a> for MemoryThreadStore<'a> {
