@@ -6,11 +6,12 @@ fn main() {
     let mut thread = MemoryThreadStore::new();
 
     let message = Message::new(String::from("hey ma gueule ?"), String::from("Bernard"));
-    thread.add(message);
+    thread.add(&message);
 
     let message = Message::new(String::from("sa va ?"), String::from("Bernard"));
-    thread.add(message);
+    thread.add(&message);
 
     let mut thread2 = MemoryThreadStore::new();
     let message2 = Message::new(String::from("ou bien ?"), String::from("Bernard"));
+    thread2.add(&message2);
 }

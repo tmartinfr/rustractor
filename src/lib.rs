@@ -1,31 +1,32 @@
-pub struct Message {
+pub struct Message<'a> {
     content: String,
     author: String,
+    thread: Option<&'a dyn Thread<'a>>,
 }
 
-impl Message {
+impl<'a> Message<'a> {
     pub fn new(content: String, author: String) -> Self {
-        Self { content, author }
+        Self { content, author, thread: None }
     }
 }
 
-pub trait Thread {
-    fn add(&mut self, message: Message);
+pub struct MemoryThreadStore<'a> {
+    messages: Vec<&'a Message<'a>>,
 }
 
-pub struct MemoryThreadStore {
-    messages: Box<Vec<Message>>,
+pub trait Thread<'a> {
+    fn add(&mut self, message: &'a Message<'a>); // , thread: Option<&'a (dyn Thread + 'a)>);
 }
 
-impl Thread for MemoryThreadStore {
-    fn add(&mut self, message: Message) {
+impl<'a> Thread<'a> for MemoryThreadStore<'a> {
+    fn add(&mut self, message: &'a Message<'a>) {
         self.messages.push(message);
     }
 }
 
-impl MemoryThreadStore {
-    pub fn new() -> MemoryThreadStore {
-        let messages = Box::new(Vec::new());
+impl<'a> MemoryThreadStore<'a> {
+    pub fn new() -> MemoryThreadStore<'a> {
+        let messages = Vec::new();
         MemoryThreadStore { messages }
     }
 }
