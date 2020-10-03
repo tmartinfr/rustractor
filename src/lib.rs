@@ -1,36 +1,51 @@
-pub struct Message<'a> {
-    content: String,
-    author: String,
-    thread: Option<&'a dyn Thread<'a>>,
+pub struct Message {
+    pub content: String,
+    pub author: String,
+    pub thread: Option<Box<dyn ThreadStore>>,
 }
 
-impl<'a> Message<'a> {
+impl Message {
     pub fn new(content: String, author: String) -> Self {
         Self { content, author, thread: None }
     }
 
-    pub fn add_thread(&mut self, thread: &'a dyn Thread<'a>) {
+    pub fn add_thread(&mut self, thread: Box<dyn ThreadStore>) {
         self.thread = Some(thread);
     }
 }
 
-pub struct MemoryThreadStore<'a> {
-    messages: Vec<&'a Message<'a>>,
+
+
+pub trait ThreadStore {
+    fn add(&mut self, message: Message);
+    fn output(&self, level: u32);
 }
 
-pub trait Thread<'a> {
-    fn add(&mut self, message: &'a Message<'a>);
+pub struct MemoryThreadStore  {
+    messages: Vec<Box<Message>>,
 }
 
-impl<'a> Thread<'a> for MemoryThreadStore<'a> {
-    fn add(&mut self, message: &'a Message<'a>) {
-        self.messages.push(message);
+impl MemoryThreadStore {
+    pub fn new() -> Box<MemoryThreadStore> {
+        let messages = Vec::new();
+        Box::new(MemoryThreadStore { messages })
     }
 }
 
-impl<'a> MemoryThreadStore<'a> {
-    pub fn new() -> MemoryThreadStore<'a> {
-        let messages = Vec::new();
-        MemoryThreadStore { messages }
+impl ThreadStore for MemoryThreadStore {
+    fn add(&mut self, message: Message) {
+        self.messages.push(Box::new(message));
+    }
+
+    fn output(&self, level: u32) {
+        for message in self.messages.iter() {
+            for _ in 0..level {
+                print!("    ");
+            }
+            println!("{}: {}", message.author, message.content);
+            if let Some(subthread) = &message.thread {
+                subthread.output(level + 1);
+            }
+        }
     }
 }
