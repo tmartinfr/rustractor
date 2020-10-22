@@ -53,3 +53,12 @@ impl ThreadStore for MemoryThreadStore {
         }
     }
 }
+
+
+pub struct SlackReader{}
+
+impl SlackReader {
+    pub fn new(slack_token: String, slack_channel: String) {
+        println!("Connecting to {} channel", slack_channel);
+    }
+}
