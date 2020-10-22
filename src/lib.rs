@@ -5,8 +5,12 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn new(content: String, author: String) -> Self {
-        Self { content, author, thread: None }
+    pub fn new(content: &str, author: &str) -> Self {
+        Self {
+            content: String::from(content),
+            author: String::from(author),
+            thread: None,
+        }
     }
 
     pub fn add_thread(&mut self, thread: Box<dyn ThreadStore>) {
