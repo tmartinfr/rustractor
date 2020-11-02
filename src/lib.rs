@@ -58,6 +58,8 @@ impl ThreadStore for MemoryThreadStore {
 }
 
 
+const SLACK_URL: &str = "https://slack.com/api";
+
 pub struct SlackReader{}
 
 impl SlackReader {
