@@ -1,4 +1,5 @@
 pub mod reader;
+pub mod writer;
 
 pub struct Message {
     pub content: String,
@@ -22,7 +23,6 @@ impl Message {
 
 pub trait ThreadStore {
     fn add(&mut self, message: Message);
-    fn output(&self, level: u32);
 }
 
 pub struct MemoryThreadStore  {
@@ -39,17 +39,5 @@ impl MemoryThreadStore {
 impl ThreadStore for MemoryThreadStore {
     fn add(&mut self, message: Message) {
         self.messages.push(Box::new(message));
-    }
-
-    fn output(&self, level: u32) {
-        for message in self.messages.iter() {
-            for _ in 0..level {
-                print!("    ");
-            }
-            println!("{}: {}", message.author, message.content);
-            if let Some(subthread) = &message.thread {
-                subthread.output(level + 1);
-            }
-        }
     }
 }
