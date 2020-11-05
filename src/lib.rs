@@ -22,22 +22,24 @@ impl Message {
 }
 
 pub trait ThreadStore {
+    fn new() -> Box<Self> where Self: Sized;
     fn add(&mut self, message: Message);
+    fn get_messages(&self) -> &Vec<Message>;
 }
 
 pub struct MemoryThreadStore  {
-    messages: Vec<Box<Message>>,
-}
-
-impl MemoryThreadStore {
-    pub fn new() -> Box<MemoryThreadStore> {
-        let messages = Vec::new();
-        Box::new(MemoryThreadStore { messages })
-    }
+    messages: Vec<Message>,
 }
 
 impl ThreadStore for MemoryThreadStore {
+    fn new() -> Box<MemoryThreadStore> {
+        let messages = Vec::new();
+        Box::new(MemoryThreadStore { messages })
+    }
     fn add(&mut self, message: Message) {
-        self.messages.push(Box::new(message));
+        self.messages.push(message);
+    }
+    fn get_messages(&self) -> &Vec<Message> {
+        &self.messages
     }
 }

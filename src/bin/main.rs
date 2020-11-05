@@ -1,5 +1,5 @@
 use std::env;
-use rustractor::MemoryThreadStore;
+use rustractor::{ThreadStore, MemoryThreadStore};
 use rustractor::reader::slack;
 use rustractor::writer::stdout;
 
