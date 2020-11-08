@@ -1,7 +1,7 @@
 pub mod stdout {
     use super::super::ThreadStore;
 
-    pub struct StdoutWriter{}
+    pub struct StdoutWriter {}
 
     impl StdoutWriter {
         pub fn write<T: ThreadStore>(thread: &Box<T>) {
