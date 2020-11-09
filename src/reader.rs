@@ -20,9 +20,11 @@ pub mod slack {
         }
 
         fn get_conv_info(slack_conv: &String) -> (&str, &str) {
-            // TODO check conv_type
             let vec: Vec<&str> = slack_conv.split(":").collect::<Vec<&str>>();
-            (vec[0], vec[1])
+            match vec[0] {
+                "channels" | "groups" | "im" | "mpim" => (vec[0], vec[1]),
+                _ => panic!("Invalid conversation type."),
+            }
         }
 
         fn get_conv_id(slack_conv: &String, slack_token: &String) -> String {
