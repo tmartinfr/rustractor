@@ -1,19 +1,20 @@
 pub mod slack {
     use super::super::Message;
     use super::super::ThreadStore;
+    use serde_json::Value;
     use ureq;
 
     pub struct SlackReader {}
 
     impl SlackReader {
-        fn slack_get(path: String, slack_token: &String) -> String {
+        fn slack_get(path: String, slack_token: &String) -> Value {
             let resp = ureq::get(format!("https://slack.com/api/{}", path).as_str())
                 .set("Authorization", format!("Bearer {}", slack_token).as_str())
                 .call();
             // TODO paginate everything
             if resp.ok() {
                 // FIXME test slack responds ok
-                resp.into_string().unwrap()
+                resp.into_json().unwrap()
             } else {
                 panic!("Error in Slack response.");
             }
@@ -33,6 +34,7 @@ pub mod slack {
                 format!("conversations.list?types={}", conv_type),
                 slack_token,
             );
+            println!("{}", payload);
             // TODO Retrieve id from response
             let conv_id = String::from("ABC");
             // FIXME debug output
