@@ -21,9 +21,10 @@ pub mod slack {
         }
 
         fn get_conv_info(slack_conv: &String) -> (&str, &str) {
+            // TODO public_channel by default
             let vec: Vec<&str> = slack_conv.split(":").collect::<Vec<&str>>();
             match vec[0] {
-                "channels" | "groups" | "im" | "mpim" => (vec[0], vec[1]),
+                "public_channel" | "private_channel" | "im" | "mpim" => (vec[0], vec[1]),
                 _ => panic!("Invalid conversation type."),
             }
         }
@@ -37,7 +38,7 @@ pub mod slack {
             println!("{}", payload);
             // TODO Retrieve id from response
             let conv_id = String::from("ABC");
-            // FIXME debug output
+            // TODO debug output
             println!("Connecting to {} conv from {}", conv_id, slack_conv);
             conv_id
         }
