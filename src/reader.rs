@@ -1,20 +1,31 @@
 pub mod slack {
     use super::super::Message;
     use super::super::ThreadStore;
+    use serde::de::DeserializeOwned;
+    use serde::{Deserialize, Serialize};
     use serde_json::Value;
     use ureq;
 
     pub struct SlackReader {}
 
+    #[derive(Serialize, Deserialize)]
+    struct SlackConversationPayload {
+        channels: Value,
+    }
+
     impl SlackReader {
-        fn slack_get(path: String, slack_token: &String) -> Value {
+        fn slack_get<T>(path: String, slack_token: &String) -> T
+        where
+            T: DeserializeOwned,
+        {
             let resp = ureq::get(format!("https://slack.com/api/{}", path).as_str())
                 .set("Authorization", format!("Bearer {}", slack_token).as_str())
                 .call();
             // TODO paginate everything
             if resp.ok() {
                 // FIXME test slack responds ok
-                resp.into_json().unwrap()
+                let content = resp.into_string().unwrap();
+                serde_json::from_str(&content).unwrap()
             } else {
                 panic!("Error in Slack response.");
             }
@@ -31,11 +42,11 @@ pub mod slack {
 
         fn get_conv_id(slack_conv: &String, slack_token: &String) -> String {
             let (conv_type, conv_name) = Self::get_conv_info(slack_conv);
-            let payload = Self::slack_get(
+            let payload: SlackConversationPayload = Self::slack_get(
                 format!("conversations.list?types={}", conv_type),
                 slack_token,
             );
-            println!("{}", payload);
+            println!("{}", payload.channels);
             // TODO Retrieve id from response
             let conv_id = String::from("ABC");
             // TODO debug output
