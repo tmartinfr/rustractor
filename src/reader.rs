@@ -10,7 +10,7 @@ pub mod slack {
 
     #[derive(Serialize, Deserialize)]
     struct SlackConversationPayload {
-        channels: Value,
+        channels: Vec<Value>,
     }
 
     impl SlackReader {
@@ -40,15 +40,22 @@ pub mod slack {
             }
         }
 
+        fn get_id_from_channels(channels: &Vec<Value>, conv_name: &str) -> String {
+            for channel in channels {
+                if channel["name"].as_str().unwrap() == conv_name {
+                    return String::from(channel["id"].as_str().unwrap());
+                }
+            }
+            panic!("Channel id not found");
+        }
+
         fn get_conv_id(slack_conv: &String, slack_token: &String) -> String {
             let (conv_type, conv_name) = Self::get_conv_info(slack_conv);
             let payload: SlackConversationPayload = Self::slack_get(
                 format!("conversations.list?types={}", conv_type),
                 slack_token,
             );
-            println!("{}", payload.channels);
-            // TODO Retrieve id from response
-            let conv_id = String::from("ABC");
+            let conv_id = Self::get_id_from_channels(&payload.channels, conv_name);
             // TODO debug output
             println!("Connecting to {} conv from {}", conv_id, slack_conv);
             conv_id
