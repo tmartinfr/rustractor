@@ -9,8 +9,13 @@ pub mod slack {
     pub struct SlackReader {}
 
     #[derive(Serialize, Deserialize)]
-    struct SlackConversationPayload {
+    struct SlackConversationListPayload {
         channels: Vec<Value>,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct SlackConversationHistoryPayload {
+        messages: Vec<Value>,
     }
 
     impl SlackReader {
@@ -51,7 +56,7 @@ pub mod slack {
 
         fn get_conv_id(slack_conv: &String, slack_token: &String) -> String {
             let (conv_type, conv_name) = Self::get_conv_info(slack_conv);
-            let payload: SlackConversationPayload = Self::slack_get(
+            let payload: SlackConversationListPayload = Self::slack_get(
                 format!("conversations.list?types={}", conv_type),
                 slack_token,
             );
@@ -66,9 +71,18 @@ pub mod slack {
             conv_id: &String,
             slack_token: &String,
         ) {
-            // curl -F channel= https://slack.com/api/conversations.history
-            // curl -F ts=1604256069.047900 -F channel= https://slack.com/api/conversations.replies
-            // TODO return thread
+            let payload: SlackConversationHistoryPayload = Self::slack_get(
+                format!("conversations.history?channel={}", conv_id),
+                slack_token,
+            );
+            for message in payload.messages {
+                let message = Message::new(
+                    message["text"].as_str().unwrap(),
+                    message["user"].as_str().unwrap(),
+                );
+                thread.add_message(message);
+            }
+            // TODO handle threads : curl -F ts=1604256069.047900 -F channel= https://slack.com/api/conversations.replies
         }
 
         pub fn read<T: ThreadStore + 'static>(

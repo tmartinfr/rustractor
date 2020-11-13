@@ -25,7 +25,7 @@ pub trait ThreadStore {
     fn new() -> Box<Self>
     where
         Self: Sized;
-    fn add(&mut self, message: Message);
+    fn add_message(&mut self, message: Message);
     fn get_messages(&self) -> &Vec<Message>;
 }
 
@@ -38,7 +38,7 @@ impl ThreadStore for MemoryThreadStore {
         let messages = Vec::new();
         Box::new(MemoryThreadStore { messages })
     }
-    fn add(&mut self, message: Message) {
+    fn add_message(&mut self, message: Message) {
         self.messages.push(message);
     }
     fn get_messages(&self) -> &Vec<Message> {
