@@ -4,6 +4,28 @@ Rustractor
 
 Retrieves conversations from Slack to terminal.
 
+Quickstart
+----------
+Build (working Rust toolchain needed) : ::
+
+    cargo build --release
+    PATH=./target/release:$PATH
+
+Expose your Slack token as environment variable (see below) : ::
+
+   export SLACK_TOKEN=
+
+Get help : ::
+
+   rustractor --help
+
+Examples : ::
+
+   rustractor public_channel:general
+   rustractor private_channel:topsecret
+   rustractor im:secretlover
+   rustractor mpim:coolkids
+
 Get Slack token
 ---------------
 Create new app on https://api.slack.com/apps, with name `Rustractor`, and choose the workspace.
