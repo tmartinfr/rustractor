@@ -4,13 +4,30 @@ use rustractor::{MemoryThreadStore, ThreadStore};
 use std::env;
 
 fn main() {
-    let mut thread = MemoryThreadStore::new();
+    if let Ok(slack_token) = env::var("SLACK_TOKEN") {
+        let args: Vec<String> = env::args().collect();
+        if args.len() != 2 {
+            help(Some("Invalid number of arguments"));
+        }
+        let first_arg = &args[1];
+        if first_arg == "--help" {
+            help(None);
+        }
+        let mut thread = MemoryThreadStore::new();
+        slack::SlackReader::read(&mut thread, &first_arg, &slack_token);
+        stdout::StdoutWriter::write(&thread);
+    } else {
+        help(Some("SLACK_TOKEN environment variable must be defined"));
+    }
+}
 
-    let slack_token =
-        env::var("SLACK_TOKEN").expect("SLACK_TOKEN environment variable must be defined.");
-    let slack_conv =
-        env::var("SLACK_CONV").expect("SLACK_CONV environment variable must be defined.");
-    slack::SlackReader::read(&mut thread, &slack_conv, &slack_token);
-
-    stdout::StdoutWriter::write(&thread);
+fn help(error_message: Option<&str>) {
+    if let Some(msg) = error_message {
+        println!("Error: {}", msg);
+    }
+    println!(
+        r#"Usage: rustractor <conversation_type>:<conversation_label>
+Where conversation_type is public_channel, private_channel, im, or mpim."#
+    );
+    std::process::exit(1);
 }
