@@ -11,7 +11,7 @@ Build (working Rust toolchain needed) : ::
     cargo build --release
     PATH=./target/release:$PATH
 
-Expose your Slack token as environment variable (see below) : ::
+Expose Slack token as environment variable (see below) : ::
 
    export SLACK_TOKEN=
 
@@ -30,13 +30,13 @@ Get Slack token
 ---------------
 Create new app on https://api.slack.com/apps, with name `Rustractor`, and choose the workspace.
 
-Get client ID & secret from your app page, store them in `CLIENT_ID` and `CLIENT_SECRET` environment variables.
+Get client ID & secret from the app page, store them in `CLIENT_ID` and `CLIENT_SECRET` environment variables.
 
 Add `https://postman-echo.com/get` to the redirection URLs in the `OAuth &
 Permissions` app page (or use an other HTTP target to access the code send by
 Slack to the redirection URL).
 
-Load this URL in a browser after adding your client ID at the end : ::
+Load this URL in a browser after adding the client ID at the end : ::
 
    https://slack.com/oauth/v2/authorize?user_scope=channels:read,channels:history,groups:read,groups:history,im:read,im:history,mpim:read,mpim:history,users:read&redirect_uri=https%3A%2F%2Fpostman-echo.com%2Fget&client_id=
 
