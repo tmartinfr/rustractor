@@ -12,7 +12,7 @@ Quickstart
 Build (working Rust toolchain needed) : ::
 
     cargo build --release
-    PATH=./target/release:$PATH
+    PATH=$PWD/target/release/:$PATH
 
 Expose Slack token as environment variable (see below) : ::
 
