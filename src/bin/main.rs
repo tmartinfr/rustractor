@@ -4,13 +4,14 @@ use rustractor::{MemoryThreadStore, ThreadStore};
 use std::env;
 
 fn main() {
-    let mut thread = MemoryThreadStore::new();
-
     if let Ok(slack_token) = env::var("SLACK_TOKEN") {
-        let slack_conv =
-            env::var("SLACK_CONV").expect("SLACK_CONV environment variable must be defined.");
+        let args: Vec<String> = env::args().collect();
+        if args.len() != 2 {
+            help("Invalid number of arguments")
+        }
+        let slack_conv = &args[1];
+        let mut thread = MemoryThreadStore::new();
         slack::SlackReader::read(&mut thread, &slack_conv, &slack_token);
-
         stdout::StdoutWriter::write(&thread);
     } else {
         help("SLACK_TOKEN environment variable must be defined");
