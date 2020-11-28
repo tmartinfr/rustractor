@@ -26,6 +26,7 @@ pub mod slack {
                     .call();
                 if resp.ok() {
                     if let Ok(content) = resp.into_string() {
+                        log::trace!("Slack HTTP response : {:?}", content);
                         let _payload: Result<Value, _> = serde_json::from_str(&content);
                         if let Ok(payload) = _payload {
                             if let Some(ok_status) = payload.get("ok") {
@@ -92,6 +93,7 @@ pub mod slack {
         }
 
         fn get_id_from_channels(channels: Vec<Value>, conv_name: &str) -> String {
+            log::trace!("Looking for channel ID among {:?}", channels);
             for channel in channels {
                 if channel["name"].as_str().unwrap() == conv_name {
                     return String::from(channel["id"].as_str().unwrap());
