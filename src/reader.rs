@@ -143,4 +143,24 @@ pub mod slack {
             Self::fill_thread(thread, &conv_id, slack_token);
         }
     }
+
+    #[cfg(test)]
+    mod tests {
+        use super::SlackReader;
+        use serde_json::Value;
+        #[test]
+        fn test_get_id_from_channels() {
+            let data = r#"
+                {
+                    "name": "general",
+                    "id": "CT43X1ZLK",
+                    "is_channel": "true"
+                }
+            "#;
+            let mut channels: Vec<Value> = Vec::new();
+            channels.push(serde_json::from_str(data).unwrap());
+            let conv_id = SlackReader::get_id_from_channels(channels, "general");
+            assert_eq!(conv_id, "CT43X1ZLK");
+        }
+    }
 }
