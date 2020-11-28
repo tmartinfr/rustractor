@@ -4,6 +4,7 @@ use rustractor::{MemoryThreadStore, ThreadStore};
 use std::env;
 
 fn main() {
+    env_logger::init();
     if let Ok(slack_token) = env::var("SLACK_TOKEN") {
         let args: Vec<String> = env::args().collect();
         if args.len() != 2 {

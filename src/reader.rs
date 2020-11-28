@@ -21,7 +21,6 @@ pub mod slack {
                 if let Some(ref some_cursor) = next_cursor {
                     url = format!("{}&cursor={}", url, some_cursor);
                 }
-                println!("Calling URL {}", url);
                 let resp = ureq::get(url.as_str())
                     .set("Authorization", format!("Bearer {}", slack_token).as_str())
                     .call();
@@ -48,7 +47,10 @@ pub mod slack {
                                         if let Some(_c) = response_metadata.get("next_cursor") {
                                             if let Value::String(c_str) = _c {
                                                 if c_str.len() > 0 {
-                                                    println!("Paginating to {}", c_str.to_string());
+                                                    log::info!(
+                                                        "Paginating to cursor {}",
+                                                        c_str.to_string()
+                                                    );
                                                     next_cursor = Some(c_str.to_string());
                                                 } else {
                                                     break;

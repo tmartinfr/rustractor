@@ -29,6 +29,8 @@ Examples : ::
    rustractor im:secretlover
    rustractor mpim:coolkids
 
+Export `RUST_LOG=info` environment variable to get informations about the program execution.
+
 Get Slack token
 ---------------
 Create new app on https://api.slack.com/apps, with name `Rustractor`, and choose the workspace.
