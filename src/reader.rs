@@ -104,13 +104,13 @@ pub mod slack {
 
         fn get_conv_id(slack_conv: &String, slack_token: &String) -> String {
             let (conv_type, conv_name) = Self::get_conv_info(slack_conv);
-            let payload = Self::slack_get(
+            let channels = Self::slack_get(
                 "conversations.list",
                 format!("types={}", conv_type).as_str(),
                 "channels",
                 slack_token,
             );
-            let conv_id = Self::get_id_from_channels(payload, conv_name);
+            let conv_id = Self::get_id_from_channels(channels, conv_name);
             conv_id
         }
 
@@ -119,13 +119,13 @@ pub mod slack {
             conv_id: &String,
             slack_token: &String,
         ) {
-            let payload = Self::slack_get(
+            let messages = Self::slack_get(
                 "conversations.history",
                 format!("channel={}", conv_id).as_str(),
                 "messages",
                 slack_token,
             );
-            for message in payload {
+            for message in messages {
                 let message = Message::new(
                     message["text"].as_str().unwrap(),
                     message["user"].as_str().unwrap(),
