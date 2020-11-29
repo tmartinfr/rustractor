@@ -160,7 +160,7 @@ pub mod slack {
             let mut channels: Vec<Value> = Vec::new();
             channels.push(serde_json::from_str(data).unwrap());
             let conv_id = SlackReader::get_id_from_channels(channels, "general");
-            assert_eq!(conv_id, "CT43X1ZLK");
+            assert_eq!(conv_id, "CT43X1ZLKx");
         }
     }
 }
