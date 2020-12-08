@@ -37,6 +37,8 @@ pub mod slack {
                                 if let Some(ressources) = payload.get(resource_key) {
                                     if let Value::Array(ressources_array) = ressources {
                                         for ressource in ressources_array {
+                                            // TODO yield these values when generator will be
+                                            // supported out of nightly
                                             all_ressources.push(ressource.to_owned());
                                         }
                                     } else {
