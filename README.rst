@@ -7,6 +7,8 @@ Retrieves conversations from Slack to terminal.
 Internal program structure allows to read conversations from other
 messaging services and write them to any destination.
 
+Doesn't support threads (yet).
+
 Quickstart
 ----------
 Build (working Rust toolchain needed) : ::
