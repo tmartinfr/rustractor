@@ -4,14 +4,16 @@ pub mod writer;
 pub struct Message {
     pub content: String,
     pub author: String,
+    pub timestamp: u32,
     pub thread: Option<Box<dyn ThreadStore>>,
 }
 
 impl Message {
-    pub fn new(content: &str, author: &str) -> Self {
+    pub fn new(content: &str, author: &str, timestamp: u32) -> Self {
         Self {
             content: String::from(content),
             author: String::from(author),
+            timestamp,
             thread: None,
         }
     }

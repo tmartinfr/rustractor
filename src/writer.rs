@@ -13,7 +13,10 @@ pub mod stdout {
                 for _ in 0..level {
                     print!("    ");
                 }
-                println!("{}: {}", message.author, message.content);
+                println!(
+                    "{} {} {}",
+                    message.timestamp, message.author, message.content
+                );
                 if let Some(subthread) = &message.thread {
                     Self::output(subthread, level + 1);
                 }

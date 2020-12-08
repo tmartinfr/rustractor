@@ -127,10 +127,17 @@ pub mod slack {
                 "messages",
                 slack_token,
             );
-            for message in messages {
+            for slack_message in slack_messages {
+                let timestamp = slack_message["ts"]
+                    .as_str()
+                    .unwrap()
+                    .split(".")
+                    .next()
+                    .unwrap();
                 let message = Message::new(
-                    message["text"].as_str().unwrap(),
-                    message["user"].as_str().unwrap(),
+                    slack_message["text"].as_str().unwrap(),
+                    slack_message["user"].as_str().unwrap(),
+                    timestamp.parse::<u32>().unwrap(),
                 );
                 thread.add_message(message);
             }
