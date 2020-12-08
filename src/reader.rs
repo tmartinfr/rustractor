@@ -121,12 +121,13 @@ pub mod slack {
             conv_id: &String,
             slack_token: &String,
         ) {
-            let messages = Self::slack_get(
+            let mut slack_messages = Self::slack_get(
                 "conversations.history",
                 format!("channel={}", conv_id).as_str(),
                 "messages",
                 slack_token,
             );
+            slack_messages.reverse(); // Store the most recent message last
             for slack_message in slack_messages {
                 let timestamp = slack_message["ts"]
                     .as_str()
