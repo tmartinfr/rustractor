@@ -1,6 +1,8 @@
 pub mod reader;
 pub mod writer;
 
+pub type ResultStrErr<T> = std::result::Result<T, &'static str>;
+
 pub struct Message {
     pub content: String,
     pub author: String,
