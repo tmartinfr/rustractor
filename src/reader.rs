@@ -87,8 +87,14 @@ pub mod slack {
 
         fn get_conv_info(slack_conv: &String) -> ResultStrErr<(&str, &str)> {
             let vec: Vec<&str> = slack_conv.split(":").collect::<Vec<&str>>();
+
+            let conv_name = match vec.get(1) {
+                Some(name) => name,
+                None => return Err("Conversation label not specified"),
+            };
+
             match vec[0] {
-                "public_channel" | "private_channel" | "im" | "mpim" => Ok((vec[0], vec[1])),
+                "public_channel" | "private_channel" | "im" | "mpim" => Ok((vec[0], conv_name)),
                 _ => return Err("Invalid conversation type"),
             }
         }
