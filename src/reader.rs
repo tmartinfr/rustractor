@@ -62,27 +62,34 @@ pub mod slack {
                     _ => return Err("Cannot read needed ressource in Slack response"),
                 };
 
-                match payload.get("response_metadata") {
-                    Some(metadata) => match metadata.get("next_cursor") {
-                        Some(cursor) => {
-                            let cursor = match cursor {
-                                Value::String(cursor) => cursor,
-                                _ => return Err("Cursor is not a string"),
-                            };
-
-                            if cursor.len() > 0 {
-                                log::info!("Paginating to cursor {}", cursor.to_string());
-                                next_cursor = Some(cursor.to_string());
-                            } else {
-                                break;
-                            }
-                        }
+                next_cursor = match Self::get_next_cursor(payload) {
+                    Ok(cursor) => match cursor {
+                        Some(cursor) => Some(cursor),
                         None => break,
                     },
-                    None => break,
+                    Err(e) => return Err(e),
                 };
             }
             Ok(all_ressources)
+        }
+
+        fn get_next_cursor(payload: Value) -> ResultStrErr<Option<String>> {
+            let metadata = match payload.get("response_metadata") {
+                Some(metadata) => metadata,
+                None => return Ok(None),
+            };
+
+            let cursor = match metadata.get("next_cursor") {
+                Some(Value::String(cursor)) => cursor,
+                _ => return Ok(None), //return Err("Cursor is not a string"),
+            };
+
+            if cursor.len() > 0 {
+                log::info!("Paginating to cursor {}", cursor.to_string());
+                return Ok(Some(cursor.to_string()));
+            }
+
+            Ok(None)
         }
 
         fn get_conv_info(slack_conv: &String) -> ResultStrErr<(&str, &str)> {
