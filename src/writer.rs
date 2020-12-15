@@ -1,5 +1,6 @@
 pub mod stdout {
     use super::super::ThreadStore;
+    use chrono::NaiveDateTime;
 
     pub struct StdoutWriter {}
 
@@ -13,10 +14,12 @@ pub mod stdout {
                 for _ in 0..level {
                     print!("    ");
                 }
-                println!(
-                    "{} {} {}",
-                    message.timestamp, message.author, message.content
-                );
+
+                let timestamp =
+                    NaiveDateTime::from_timestamp(message.timestamp as i64, 0).format("%F %X");
+
+                println!("{} {} {}", timestamp, message.author, message.content);
+
                 if let Some(subthread) = &message.thread {
                     Self::output(subthread, level + 1);
                 }
