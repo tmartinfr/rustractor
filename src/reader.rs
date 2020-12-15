@@ -51,20 +51,15 @@ pub mod slack {
                     None => return Err("Cannot read Slack ok status"),
                 };
 
-                let ressources = match payload.get(resource_key) {
-                    Some(ressources) => ressources,
-                    None => return Err("Cannot read needed ressource in Slack response"),
-                };
-
-                match ressources {
-                    Value::Array(ressources) => {
+                match payload.get(resource_key) {
+                    Some(Value::Array(ressources)) => {
                         for ressource in ressources {
                             // TODO yield these values when generator will be
                             // supported out of nightly
                             all_ressources.push(ressource.to_owned());
                         }
                     }
-                    _ => return Err("Invalid ressource response type"),
+                    _ => return Err("Cannot read needed ressource in Slack response"),
                 };
 
                 match payload.get("response_metadata") {
@@ -101,8 +96,18 @@ pub mod slack {
         fn get_id_from_channels(channels: Vec<Value>, conv_name: &str) -> ResultStrErr<String> {
             log::trace!("Looking for channel ID among {:?}", channels);
             for channel in channels {
-                if channel["name"].as_str().unwrap() == conv_name {
-                    return Ok(String::from(channel["id"].as_str().unwrap()));
+                let channel_id = match channel.get("id") {
+                    Some(Value::String(id)) => id,
+                    _ => return Err("Cannot read id from channel"),
+                };
+
+                let channel_name = match channel.get("name") {
+                    Some(Value::String(name)) => name,
+                    _ => return Err("Cannot read name from channel"),
+                };
+
+                if channel_name == conv_name {
+                    return Ok(channel_id.to_string());
                 }
             }
             Err("Channel id not found")
@@ -133,17 +138,30 @@ pub mod slack {
             )?;
             slack_messages.reverse(); // Store the most recent message last
             for slack_message in slack_messages {
-                let timestamp = slack_message["ts"]
-                    .as_str()
-                    .unwrap()
-                    .split(".")
-                    .next()
-                    .unwrap();
-                let message = Message::new(
-                    slack_message["text"].as_str().unwrap(),
-                    slack_message["user"].as_str().unwrap(),
-                    timestamp.parse::<u32>().unwrap(),
-                );
+                let timestamp_ms = match slack_message.get("ts") {
+                    Some(Value::String(ts)) => ts,
+                    _ => return Err("Cannot read timestamp from Slack message"),
+                };
+
+                let timestamp = match timestamp_ms.split(".").next() {
+                    Some(result) => match result.parse::<u32>() {
+                        Ok(result) => result,
+                        Err(_) => return Err("Cannot convert timestamp"),
+                    },
+                    None => return Err("Cannot parse timestamp"),
+                };
+
+                let content = match slack_message.get("text") {
+                    Some(Value::String(content)) => content,
+                    _ => return Err("Cannot read message content from Slack message"),
+                };
+
+                let author = match slack_message.get("user") {
+                    Some(Value::String(author)) => author,
+                    _ => return Err("Cannot read author from Slack message"),
+                };
+
+                let message = Message::new(content, author, timestamp);
                 thread.add_message(message);
             }
             Ok(())
@@ -176,7 +194,7 @@ pub mod slack {
             let mut channels: Vec<Value> = Vec::new();
             channels.push(serde_json::from_str(data).unwrap());
             let conv_id = SlackReader::get_id_from_channels(channels, "general");
-            assert_eq!(conv_id, "CT43X1ZLK");
+            assert_eq!(conv_id.unwrap(), "CT43X1ZLK");
         }
     }
 }
