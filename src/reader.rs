@@ -81,7 +81,7 @@ pub mod slack {
 
             let cursor = match metadata.get("next_cursor") {
                 Some(Value::String(cursor)) => cursor,
-                _ => return Ok(None), //return Err("Cursor is not a string"),
+                _ => return Ok(None),
             };
 
             if cursor.len() > 0 {
