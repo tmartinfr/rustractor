@@ -10,7 +10,7 @@ pub mod slack {
     impl SlackReader {
         fn slack_get<'a>(
             endpoint: &str,
-            param: &str,
+            param: Option<&str>,
             resource_key: &str,
             slack_token: &String,
         ) -> ResultStrErr<Vec<Value>> {
@@ -18,10 +18,18 @@ pub mod slack {
             let mut next_cursor: Option<String> = None;
 
             loop {
-                let mut url = format!("https://slack.com/api/{}?{}", endpoint, param);
+                let mut url = format!("https://slack.com/api/{}", endpoint);
+
+                if let Some(param) = param {
+                    url = format!("{}?{}", url, param);
+                }
 
                 if let Some(ref cursor) = next_cursor {
-                    url = format!("{}&cursor={}", url, cursor);
+                    let mut separator = "?";
+                    if param.is_some() {
+                        separator = "&";
+                    }
+                    url = format!("{}{}cursor={}", url, separator, cursor);
                 }
 
                 let resp = ureq::get(url.as_str())
@@ -130,7 +138,7 @@ pub mod slack {
             let (conv_type, conv_name) = Self::get_conv_info(slack_conv)?;
             let channels = Self::slack_get(
                 "conversations.list",
-                format!("types={}", conv_type).as_str(),
+                Some(format!("types={}", conv_type).as_str()),
                 "channels",
                 slack_token,
             )?;
@@ -145,7 +153,7 @@ pub mod slack {
         ) -> ResultStrErr<()> {
             let mut slack_messages = Self::slack_get(
                 "conversations.history",
-                format!("channel={}", conv_id).as_str(),
+                Some(format!("channel={}", conv_id).as_str()),
                 "messages",
                 slack_token,
             )?;
