@@ -3,9 +3,12 @@ pub mod slack {
     use super::super::ResultStrErr;
     use super::super::ThreadStore;
     use serde_json::Value;
+    use std::collections::HashMap;
     use ureq;
 
     pub struct SlackReader {}
+
+    type Users = HashMap<String, String>;
 
     impl SlackReader {
         fn slack_get<'a>(
@@ -100,7 +103,10 @@ pub mod slack {
             Ok(None)
         }
 
-        fn get_conv_info(slack_conv: &String) -> ResultStrErr<(&str, &str)> {
+        fn get_conv_info(
+            slack_conv: &String,
+            users: Users,
+        ) -> ResultStrErr<(String, &str, String)> {
             let vec: Vec<&str> = slack_conv.split(":").collect::<Vec<&str>>();
 
             let conv_name = match vec.get(1) {
@@ -109,40 +115,57 @@ pub mod slack {
             };
 
             match vec[0] {
-                "public_channel" | "private_channel" | "im" | "mpim" => Ok((vec[0], conv_name)),
+                "public_channel" | "private_channel" | "mpim" => {
+                    Ok((vec[0].to_string(), "name", conv_name.to_string()))
+                }
+                "im" => {
+                    let user_id = match users.get(*conv_name) {
+                        Some(user_id) => user_id,
+                        None => return Err("Cannot find username"),
+                    };
+                    Ok((vec[0].to_string(), "user", user_id.to_string()))
+                }
                 _ => return Err("Invalid conversation type"),
             }
         }
 
-        fn get_id_from_channels(channels: Vec<Value>, conv_name: &str) -> ResultStrErr<String> {
+        fn get_id_from_channels(
+            channels: Vec<Value>,
+            lookup_key: &str,
+            lookup_value: String,
+        ) -> ResultStrErr<String> {
             log::trace!("Looking for channel ID among {:?}", channels);
             for channel in channels {
                 let channel_id = match channel.get("id") {
                     Some(Value::String(id)) => id,
-                    _ => return Err("Cannot read id from channel"),
+                    _ => return Err("Cannot read id from channel payload"),
                 };
 
-                let channel_name = match channel.get("name") {
-                    Some(Value::String(name)) => name,
-                    _ => return Err("Cannot read name from channel"),
+                let value = match channel.get(lookup_key) {
+                    Some(Value::String(key)) => key,
+                    _ => return Err("Cannot read {key} key from channel payload"),
                 };
 
-                if channel_name == conv_name {
+                if *value == lookup_value {
                     return Ok(channel_id.to_string());
                 }
             }
             Err("Channel id not found")
         }
 
-        fn get_conv_id(slack_conv: &String, slack_token: &String) -> ResultStrErr<String> {
-            let (conv_type, conv_name) = Self::get_conv_info(slack_conv)?;
+        fn get_conv_id(
+            slack_conv: &String,
+            users: Users,
+            slack_token: &String,
+        ) -> ResultStrErr<String> {
+            let (conv_type, lookup_key, lookup_value) = Self::get_conv_info(slack_conv, users)?;
             let channels = Self::slack_get(
                 "conversations.list",
                 Some(format!("types={}", conv_type).as_str()),
                 "channels",
                 slack_token,
             )?;
-            let conv_id = Self::get_id_from_channels(channels, conv_name)?;
+            let conv_id = Self::get_id_from_channels(channels, lookup_key, lookup_value)?;
             Ok(conv_id)
         }
 
@@ -188,12 +211,30 @@ pub mod slack {
             Ok(())
         }
 
+        fn get_users(slack_token: &String) -> ResultStrErr<Users> {
+            let users = Self::slack_get("users.list", None, "members", slack_token)?;
+            let mut simple_users: Users = HashMap::new();
+            for user in users {
+                let user_id = match user.get("id") {
+                    Some(Value::String(id)) => id,
+                    _ => return Err("Cannot read user id from Slack response"),
+                };
+                let user_name = match user.get("name") {
+                    Some(Value::String(name)) => name,
+                    _ => return Err("Cannot read username from Slack response"),
+                };
+                simple_users.insert(user_name.to_owned(), user_id.to_owned());
+            }
+            Ok(simple_users)
+        }
+
         pub fn read<T: ThreadStore + 'static>(
             thread: &mut Box<T>,
             slack_conv: &String,
             slack_token: &String,
         ) -> ResultStrErr<()> {
-            let conv_id = Self::get_conv_id(slack_conv, slack_token)?;
+            let users = Self::get_users(slack_token)?;
+            let conv_id = Self::get_conv_id(slack_conv, users, slack_token)?;
             Self::fill_thread(thread, &conv_id, slack_token)?;
             Ok(())
         }
