@@ -28,8 +28,8 @@ Examples : ::
 
    rustractor public_channel:general
    rustractor private_channel:topsecret
-   rustractor im:secretlover
-   rustractor mpim:coolkids
+   rustractor im:secret.lover
+   rustractor mpim:mpdm-alice--bob
 
 Export ``RUST_LOG=info`` environment variable to get informations about the program execution.
 
