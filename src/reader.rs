@@ -103,10 +103,10 @@ pub mod slack {
             Ok(None)
         }
 
-        fn get_conv_info(
+        fn get_conv_info<'a>(
             slack_conv: &String,
-            users: Users,
-        ) -> ResultStrErr<(String, &str, String)> {
+            users: &Users,
+        ) -> ResultStrErr<(String, &'a str, String)> {
             let vec: Vec<&str> = slack_conv.split(":").collect::<Vec<&str>>();
 
             let conv_name = match vec.get(1) {
@@ -155,7 +155,7 @@ pub mod slack {
 
         fn get_conv_id(
             slack_conv: &String,
-            users: Users,
+            users: &Users,
             slack_token: &String,
         ) -> ResultStrErr<String> {
             let (conv_type, lookup_key, lookup_value) = Self::get_conv_info(slack_conv, users)?;
@@ -172,6 +172,7 @@ pub mod slack {
         fn fill_thread<T: ThreadStore + 'static>(
             thread: &mut Box<T>,
             conv_id: &String,
+            users: &Users,
             slack_token: &String,
         ) -> ResultStrErr<()> {
             let mut slack_messages = Self::slack_get(
@@ -234,8 +235,8 @@ pub mod slack {
             slack_token: &String,
         ) -> ResultStrErr<()> {
             let users = Self::get_users(slack_token)?;
-            let conv_id = Self::get_conv_id(slack_conv, users, slack_token)?;
-            Self::fill_thread(thread, &conv_id, slack_token)?;
+            let conv_id = Self::get_conv_id(slack_conv, &users, slack_token)?;
+            Self::fill_thread(thread, &conv_id, &users, slack_token)?;
             Ok(())
         }
     }
