@@ -1,5 +1,6 @@
 pub mod reader;
 pub mod writer;
+use std::collections::HashMap;
 
 pub type ResultStrErr<T> = std::result::Result<T, &'static str>;
 
@@ -48,4 +49,12 @@ impl ThreadStore for MemoryThreadStore {
     fn get_messages(&self) -> &Vec<Message> {
         &self.messages
     }
+}
+
+fn reverse(h: &HashMap<String, String>) -> HashMap<String, String> {
+    let mut new = HashMap::new();
+    for (k, v) in h {
+        new.entry(v.to_string()).or_insert(k.to_string());
+    }
+    new
 }

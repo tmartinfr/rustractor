@@ -1,4 +1,5 @@
 pub mod slack {
+    use super::super::reverse;
     use super::super::Message;
     use super::super::ResultStrErr;
     use super::super::ThreadStore;
@@ -143,7 +144,7 @@ pub mod slack {
 
                 let value = match channel.get(lookup_key) {
                     Some(Value::String(key)) => key,
-                    _ => return Err("Cannot read {key} key from channel payload"),
+                    _ => return Err("Cannot read key from channel payload"),
                 };
 
                 if *value == lookup_value {
@@ -175,6 +176,7 @@ pub mod slack {
             users: &Users,
             slack_token: &String,
         ) -> ResultStrErr<()> {
+            let users_r = reverse(users);
             let mut slack_messages = Self::slack_get(
                 "conversations.history",
                 Some(format!("channel={}", conv_id).as_str()),
@@ -202,7 +204,10 @@ pub mod slack {
                 };
 
                 let author = match slack_message.get("user") {
-                    Some(Value::String(author)) => author,
+                    Some(Value::String(user_id)) => match users_r.get(user_id) {
+                        Some(username) => username,
+                        None => return Err("Cannot find matching username"),
+                    },
                     _ => return Err("Cannot read author from Slack message"),
                 };
 

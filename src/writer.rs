@@ -18,7 +18,7 @@ pub mod stdout {
                 let timestamp =
                     NaiveDateTime::from_timestamp(message.timestamp as i64, 0).format("%F %X");
 
-                println!("{} {} {}", timestamp, message.author, message.content);
+                println!("{} {}: {}", timestamp, message.author, message.content);
 
                 if let Some(subthread) = &message.thread {
                     Self::output(subthread, level + 1);
